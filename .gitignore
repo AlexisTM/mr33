@@ -1,0 +1,9 @@
+# OpenWrt SDK, its download and the openwrt.git clone (its own repo, branch mr33)
+/sdk/
+/sdk-dl/
+/src/
+
+# build and test leftovers
+/packages/spectrald/tests/test_fft
+__pycache__/
+*.egg-info/

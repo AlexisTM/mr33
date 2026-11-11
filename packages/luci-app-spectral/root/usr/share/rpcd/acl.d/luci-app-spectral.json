@@ -1,0 +1,15 @@
+{
+	"luci-app-spectral": {
+		"description": "Grant access to the live spectrum analyzer",
+		"read": {
+			"ubus": {
+				"spectral": [ "radios", "status", "frames" ]
+			}
+		},
+		"write": {
+			"ubus": {
+				"spectral": [ "start", "stop" ]
+			}
+		}
+	}
+}

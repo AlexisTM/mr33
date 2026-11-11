@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mr33-spectral"
+version = "1.0.0"
+description = "Pull live spectrum data from the MR33's spectrald, without LuCI"
+requires-python = ">=3.8"
+license = { text = "GPL-2.0-only" }
+
+[project.scripts]
+mr33-spectral = "mr33spectral.__main__:main"
+
+[tool.setuptools]
+packages = ["mr33spectral"]
