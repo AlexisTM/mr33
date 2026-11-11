@@ -1,0 +1,45 @@
+From 625bc55abe77ca12256f708ae3dcebd40e099290 Mon Sep 17 00:00:00 2001
+From: Alexis Paques <alexis@corvus-robotics.com>
+Date: Wed, 11 Nov 2026 21:08:19 +0100
+Subject: [PATCH] kmods: bump mac80211 and ath10k-ct releases for spectral scan
+
+The MR33 runs these kmods rebuilt with CONFIG_PACKAGE_ATH_DEBUG and
+CONFIG_PACKAGE_ATH_SPECTRAL. The higher releases make apk keep them
+over the official 25.12.6 builds.
+
+Co-Authored-By: Puffin <puffin@aukmind.com>
+Claude-Session: https://claude.ai/code/session_01UHUXu8hBeFR8mziThTH44J
+---
+ package/kernel/ath10k-ct/Makefile | 2 +-
+ package/kernel/mac80211/Makefile  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/package/kernel/ath10k-ct/Makefile b/package/kernel/ath10k-ct/Makefile
+index 48514a6b40..6e0f9b2afe 100644
+--- a/package/kernel/ath10k-ct/Makefile
++++ b/package/kernel/ath10k-ct/Makefile
+@@ -1,7 +1,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=ath10k-ct
+-PKG_RELEASE:=1
++PKG_RELEASE:=2
+ 
+ PKG_LICENSE:=GPLv2
+ PKG_LICENSE_FILES:=
+diff --git a/package/kernel/mac80211/Makefile b/package/kernel/mac80211/Makefile
+index c4764687c6..99948b1cdc 100644
+--- a/package/kernel/mac80211/Makefile
++++ b/package/kernel/mac80211/Makefile
+@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/kernel.mk
+ PKG_NAME:=mac80211
+ 
+ PKG_VERSION:=6.18.55
+-PKG_RELEASE:=2
++PKG_RELEASE:=3
+ PKG_LICENSE:=GPL-2.0-only
+ PKG_LICENSE_FILES:=COPYING
+ 
+-- 
+2.53.0
+

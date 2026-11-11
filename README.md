@@ -5,7 +5,10 @@ Package development for the Meraki MR33 (codename *Stinkbug*) on OpenWrt 25.12.6
 | Path | What |
 |---|---|
 | `sdk/` | Official OpenWrt 25.12.6 SDK for `ipq40xx/generic` (GCC 14.3, musl). Builds packages and kmods against the release kernel. |
-| `src/` | Clone of `openwrt.git`, branch `mr33` at `v25.12.6`, the exact commit the SDK was built from. The SDK's `base` feed points at `src/package`, so core-package changes go here. Also the reference for DTS and board files. |
+| `src/` | Clone of `openwrt.git`, branch `mr33` at `v25.12.6`, the exact commit the SDK was built from. The SDK's `base` feed points at `src/package`. Not tracked here: changes to it are kept as patches in `patches/openwrt/`. Also the reference for DTS and board files. |
+| `patches/openwrt/` | Patches for `src/`, applied with `git -C src am` |
+| `config/` | Fragments appended to `sdk/.config` |
+| `client/` | Python SDK and CLI for the spectrum analyzer |
 | `packages/` | Local feed `custom` for your own packages. |
 | `sdk-dl/` | SDK tarball plus the signed `sha256sums` it was checked against. |
 
@@ -165,7 +168,7 @@ Re-run the feeds line whenever you add a package or change its dependencies. Mak
 
 ### Changing a core package
 
-Core packages (hostapd, ath10k-ct, base-files...) build from `src/package`. Edit them on the `mr33` branch and bump `PKG_RELEASE` in the package Makefile, so `apk` sees your build as newer than the official one and doesn't swap it back on `apk upgrade`. After adding a new package to `src/package`, run `./scripts/feeds update base && ./scripts/feeds install -p base <name>` in `sdk/`.
+Core packages (hostapd, ath10k-ct, base-files...) build from `src/package`. Edit them in `src/` and bump `PKG_RELEASE` in the package Makefile, so `apk` sees your build as newer than the official one and doesn't swap it back on `apk upgrade`. Keep the change in this repo, not in `src/`: commit it in `src/`, export it with `git -C src format-patch -1 -o ../patches/openwrt`, and drop the commit again with `git -C src reset HEAD~1` if you want `src/` to stay on the tag. After adding a new package to `src/package`, run `./scripts/feeds update base && ./scripts/feeds install -p base <name>` in `sdk/`.
 
 `src/` must stay on `v25.12.6`, or kmods and libraries stop matching the firmware. To move to a newer release, get the matching SDK and image, then `git -C src rebase --onto v25.12.N v25.12.6 mr33`.
 
@@ -175,14 +178,19 @@ Core packages (hostapd, ath10k-ct, base-files...) build from `src/package`. Edit
 
 ### Spectral scan kmods
 
-The release kernel already has `CONFIG_RELAY=y` and `CONFIG_DEBUG_FS=y`, and exports `relay_open`, so spectral scan only needs the Wi-Fi modules rebuilt. `sdk/.config` has (then `make defconfig`):
+The release kernel already has `CONFIG_RELAY=y` and `CONFIG_DEBUG_FS=y`, and exports `relay_open`, so spectral scan only needs the Wi-Fi modules rebuilt. Everything needed lives in this repo; `src/` and `sdk/` stay pristine downloads:
 
-```
-CONFIG_PACKAGE_ATH_DEBUG=y
-CONFIG_PACKAGE_ATH_SPECTRAL=y
+```sh
+git -C src am ../patches/openwrt/*.patch      # or: git -C src apply ../patches/openwrt/*.patch
+cat config/sdk.config >> sdk/.config && make -C sdk defconfig
 ```
 
-`PKG_RELEASE` is bumped in `src/package/kernel/mac80211/Makefile` and `src/package/kernel/ath10k-ct/Makefile` so the rebuilt kmods win over the official ones. `kmod-mac80211` depends on `hostapd-common`, so the first `package/mac80211/compile` also builds every hostapd variant (about 15 to 30 minutes). A parallel build can fail spuriously in a hostapd variant; running the same command again picks up where it stopped.
+| File | What |
+|---|---|
+| `patches/openwrt/0001-*.patch` | Bumps `PKG_RELEASE` of mac80211 and ath10k-ct, so the rebuilt kmods win over the official ones in `apk` |
+| `config/sdk.config` | `CONFIG_PACKAGE_ATH_DEBUG=y` and `CONFIG_PACKAGE_ATH_SPECTRAL=y` |
+
+The SDK's `base` feed reads `src/package`, so the patch has to be applied in `src/` before building. `kmod-mac80211` depends on `hostapd-common`, so the first `package/mac80211/compile` also builds every hostapd variant (about 15 to 30 minutes). A parallel build can fail spuriously in a hostapd variant; running the same command again picks up where it stopped.
 
 ## Spectrum analyzer
 
